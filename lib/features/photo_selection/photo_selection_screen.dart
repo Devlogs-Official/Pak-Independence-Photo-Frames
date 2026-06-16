@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/category_ids.dart';
+import '../dps/dp_editing_screen.dart';
 import '../frames/screens/frames_editing_screen.dart';
 
 class PhotoSelectionScreen extends StatefulWidget {
@@ -61,8 +62,8 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen>
                 child: Hero(
                   tag: 'frame-${widget.selectedFrame}',
                   child: Container(
-                    width: 200,
-                    height: 270,
+                    width: _isDpFrame ? 220 : 200,
+                    height: _isDpFrame ? 220 : 270,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
                       gradient: AppColors.primaryGradient,
@@ -174,15 +175,21 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen>
       );
       if (!mounted || image == null) return;
 
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => FramesEditingScreen(
-            frameImageUrl: widget.selectedFrame,
-            imagePath: image.path,
-            categoryId: widget.categoryId.toString(),
-          ),
-        ),
-      );
+      final Widget editor = _isDpFrame
+          ? DPEditingScreen(
+              frameImageUrl: widget.selectedFrame,
+              imagePath: image.path,
+              categoryId: widget.categoryId.toString(),
+            )
+          : FramesEditingScreen(
+              frameImageUrl: widget.selectedFrame,
+              imagePath: image.path,
+              categoryId: widget.categoryId.toString(),
+            );
+
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute<void>(builder: (_) => editor));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -199,6 +206,8 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen>
     }
     return Image.asset(frame, fit: BoxFit.cover);
   }
+
+  bool get _isDpFrame => widget.categoryId == CategoryIds.dpFrames;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

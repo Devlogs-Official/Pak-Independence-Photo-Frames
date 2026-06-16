@@ -38,6 +38,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen>
   late final WallpaperProvider _wallpaperProvider;
 
   static const double _canvasAspect = 1080 / 1720;
+  static const double _dpCanvasAspect = 1;
 
   @override
   void initState() {
@@ -93,7 +94,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen>
                   ),
                   if (provider.isInitialLoading)
                     const SliverFillRemaining(
-                      child: LoadingWidget(message: 'Loading wallpapers...'),
+                      child: LoadingWidget(message: 'Loading ...'),
                     )
                   else if (provider.items.isEmpty && provider.hasError)
                     SliverFillRemaining(
@@ -104,7 +105,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen>
                     )
                   else if (provider.items.isEmpty)
                     const SliverFillRemaining(
-                      child: EmptyWidget(message: 'No wallpapers found.'),
+                      child: EmptyWidget(message: 'No Data Found.'),
                     )
                   else ...[
                     SliverPadding(
@@ -129,10 +130,9 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen>
                           crossAxisCount: 2,
                           mainAxisSpacing: 16,
                           crossAxisSpacing: 16,
-                          childAspectRatio:
-                              CategoryIds.isFrameCategory(widget.categoryId)
-                              ? _canvasAspect
-                              : 0.66,
+                          childAspectRatio: _gridAspectForCategory(
+                            widget.categoryId,
+                          ),
                         ),
                         itemBuilder: (context, index) {
                           final wallpaper = provider.items[index];
@@ -182,6 +182,12 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen>
     if (categoryId == CategoryIds.liveWallpapers) return 'Tap to preview live';
     if (categoryId == CategoryIds.greetingCards) return 'Tap to open card';
     return 'Tap to preview wallpaper';
+  }
+
+  double _gridAspectForCategory(int categoryId) {
+    if (categoryId == CategoryIds.dpFrames) return _dpCanvasAspect;
+    if (CategoryIds.isFrameCategory(categoryId)) return _canvasAspect;
+    return 0.66;
   }
 
   String _labelForCategory(int categoryId) {

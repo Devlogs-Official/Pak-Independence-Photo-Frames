@@ -7,6 +7,7 @@ import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/category_ids.dart';
+import '../../widgets/app_drawer.dart';
 import '../favorites/favorites_screen.dart';
 import 'category_detail_screen.dart';
 
@@ -63,12 +64,11 @@ class _HomeScreenState extends State<HomeScreen>
         child: Scaffold(
           key: _scaffoldKey,
           backgroundColor: AppColors.lightBackground,
-          drawer: _AppDrawer(
+          drawer: AppDrawer(
             onFavorites: _openFavorites,
             onShare: _shareApp,
             onPrivacy: () => _openUrl(AppConstants.privacyPolicyUrl),
             onTerms: () => _openUrl(AppConstants.termsAndConditionsUrl),
-            onRate: _rateApp,
           ),
           body: CustomScrollView(
             physics: const BouncingScrollPhysics(),
@@ -272,14 +272,6 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Future<void> _rateApp() async {
-    final deepLink = Uri.parse(AppConstants.playStoreDeepLink);
-    if (await canLaunchUrl(deepLink)) {
-      await launchUrl(deepLink);
-      return;
-    }
-    await _openUrl(AppConstants.playStoreUrl);
-  }
 
   Future<void> _openUrl(String value) async {
     final uri = Uri.parse(value);
@@ -507,152 +499,6 @@ class _HeroMenuButton extends StatelessWidget {
   }
 }
 
-class _AppDrawer extends StatelessWidget {
-  final VoidCallback onFavorites;
-  final VoidCallback onShare;
-  final VoidCallback onPrivacy;
-  final VoidCallback onTerms;
-  final VoidCallback onRate;
-
-  const _AppDrawer({
-    required this.onFavorites,
-    required this.onShare,
-    required this.onPrivacy,
-    required this.onTerms,
-    required this.onRate,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Drawer(
-      backgroundColor: AppColors.lightBackground,
-      child: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
-              decoration: const BoxDecoration(
-                gradient: AppColors.primaryGradient,
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    radius: 26,
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.flag_rounded,
-                      color: AppColors.pakistanGreen,
-                    ),
-                  ),
-                  SizedBox(height: 14),
-                  Text(
-                    AppConstants.appName,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                      height: 1.12,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Version ${AppConstants.appVersion}',
-                    style: TextStyle(
-                      color: Color(0xDFFFFFFF),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                children: [
-                  _DrawerTile(
-                    icon: Icons.home_rounded,
-                    label: 'Home',
-                    onTap: () => Navigator.of(context).pop(),
-                  ),
-                  _DrawerTile(
-                    icon: Icons.favorite_rounded,
-                    label: 'Favorites',
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      onFavorites();
-                    },
-                  ),
-                  _DrawerTile(
-                    icon: Icons.share_rounded,
-                    label: 'Share App',
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      onShare();
-                    },
-                  ),
-                  _DrawerTile(
-                    icon: Icons.privacy_tip_rounded,
-                    label: 'Privacy Policy',
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      onPrivacy();
-                    },
-                  ),
-                  _DrawerTile(
-                    icon: Icons.description_rounded,
-                    label: 'Terms & Conditions',
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      onTerms();
-                    },
-                  ),
-                  _DrawerTile(
-                    icon: Icons.star_rate_rounded,
-                    label: 'Rate App',
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      onRate();
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DrawerTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _DrawerTile({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon, color: AppColors.pakistanGreen),
-      title: Text(
-        label,
-        style: const TextStyle(
-          color: AppColors.ink,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-      onTap: onTap,
-    );
-  }
-}
 
 class _CategoryCard extends StatefulWidget {
   final String icon;

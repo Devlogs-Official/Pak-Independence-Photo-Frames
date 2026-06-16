@@ -1,7 +1,7 @@
 class AppConstants {
   AppConstants._();
 
-  static const String appName = 'Pakistan Independence Wallpapers';
+  static const String appName = '14 August Photo Frames';
   static const String appVersion = '1.0.0';
   static const String androidPackageId =
       'pro.devlogs.pakistan.independence.wallpapers';
@@ -23,5 +23,5 @@ class AppConstants {
       'https://www.devlogs.pro/terms-and-conditions/';
 
   static String get shareMessage =>
-      'Check out Pakistan Independence Wallpapers\n$playStoreUrl';
+      'Check out 14 August Photo Frames\n$playStoreUrl';
 }
