@@ -13,6 +13,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../data/services/wallpaper_service.dart';
 
 class FramesEditingScreen extends StatefulWidget {
   final String frameImageUrl;
@@ -151,11 +152,11 @@ class _FramesEditingScreenState extends State<FramesEditingScreen> {
                               child: CircularProgressIndicator(),
                             )
                           : SizedBox.expand(
-                            child: _buildFrameImage(
+                              child: _buildFrameImage(
                                 _selectedFramePath,
                                 fit: BoxFit.fill,
                               ),
-                          ),
+                            ),
                     ),
                   ),
                   ..._textOverlays.map((overlay) => _buildTextOverlay(overlay)),
@@ -1162,7 +1163,11 @@ class _FramesEditingScreenState extends State<FramesEditingScreen> {
   Future<void> _precacheSelectedFrame(String path) async {
     setState(() => _isFrameLoading = true);
     try {
-      await precacheImage(AssetImage(path), context);
+      final imageProvider =
+          path.startsWith('http://') || path.startsWith('https://')
+          ? NetworkImage(path)
+          : AssetImage(path) as ImageProvider;
+      await precacheImage(imageProvider, context);
 
       if (!mounted || _selectedFramePath != path) return;
       setState(() {
@@ -1184,15 +1189,38 @@ class IndependenceFrame {
 }
 
 class IndependenceFrameProvider extends ChangeNotifier {
+  final WallpaperService _service;
   final Map<String, List<IndependenceFrame>> _frames = {};
+
+  IndependenceFrameProvider({
+    WallpaperService service = const WallpaperService(),
+  }) : _service = service;
 
   List<IndependenceFrame> getFrames(String categoryId) =>
       _frames[categoryId] ?? const [];
 
   Future<void> fetchFrames(String categoryId) async {
-    _frames[categoryId] = AppAssets.frames
-        .map((framePath) => IndependenceFrame(framePath))
-        .toList(growable: false);
+    final parsedCategoryId = int.tryParse(categoryId);
+    if (parsedCategoryId == null) {
+      _frames[categoryId] = AppAssets.frames
+          .map((framePath) => IndependenceFrame(framePath))
+          .toList(growable: false);
+      notifyListeners();
+      return;
+    }
+
+    try {
+      final response = await _service.fetchWallpapers(
+        categoryId: parsedCategoryId,
+        page: 1,
+        pageSize: 60,
+      );
+      _frames[categoryId] = response.wallpapers
+          .map((wallpaper) => IndependenceFrame(wallpaper.imageUrl))
+          .toList(growable: false);
+    } catch (_) {
+      _frames[categoryId] = const [];
+    }
     notifyListeners();
   }
 }

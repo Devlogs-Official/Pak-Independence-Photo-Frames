@@ -26,7 +26,7 @@ class AppTheme {
       scaffoldBackgroundColor: isDark
           ? AppColors.darkBackground
           : AppColors.lightBackground,
-      fontFamily: 'Roboto',
+      fontFamily: 'Playfair',
       appBarTheme: AppBarTheme(
         elevation: 0,
         centerTitle: false,

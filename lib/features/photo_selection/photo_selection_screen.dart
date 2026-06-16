@@ -4,12 +4,18 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/category_ids.dart';
 import '../frames/screens/frames_editing_screen.dart';
 
 class PhotoSelectionScreen extends StatefulWidget {
   final String selectedFrame;
+  final int categoryId;
 
-  const PhotoSelectionScreen({required this.selectedFrame, super.key});
+  const PhotoSelectionScreen({
+    required this.selectedFrame,
+    this.categoryId = CategoryIds.frames,
+    super.key,
+  });
 
   @override
   State<PhotoSelectionScreen> createState() => _PhotoSelectionScreenState();
@@ -60,13 +66,12 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen>
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
                       gradient: AppColors.primaryGradient,
-                      border: Border.all(
-                        color: AppColors.gold,
-                        width: 2.5,
-                      ),
+                      border: Border.all(color: AppColors.gold, width: 2.5),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.pakistanGreen.withValues(alpha: 0.22),
+                          color: AppColors.pakistanGreen.withValues(
+                            alpha: 0.22,
+                          ),
                           blurRadius: 30,
                           offset: const Offset(0, 14),
                         ),
@@ -80,10 +85,7 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen>
                     padding: const EdgeInsets.all(8),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(18),
-                      child: Image.asset(
-                        widget.selectedFrame,
-                        fit: BoxFit.cover,
-                      ),
+                      child: _buildFramePreview(widget.selectedFrame),
                     ),
                   ),
                 ),
@@ -137,7 +139,9 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen>
                 icon: AppAssets.galleryIcon,
                 title: 'Gallery',
                 subtitle: 'Pick an existing photo',
-                onTap: _isPicking ? null : () => _pickImage(ImageSource.gallery),
+                onTap: _isPicking
+                    ? null
+                    : () => _pickImage(ImageSource.gallery),
               ),
               const SizedBox(height: 14),
               _ActionCard(
@@ -153,7 +157,6 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen>
               ],
 
               const SizedBox(height: 20),
-
             ],
           ),
         ),
@@ -176,7 +179,7 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen>
           builder: (_) => FramesEditingScreen(
             frameImageUrl: widget.selectedFrame,
             imagePath: image.path,
-            categoryId: 'independence',
+            categoryId: widget.categoryId.toString(),
           ),
         ),
       );
@@ -188,6 +191,13 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen>
     } finally {
       if (mounted) setState(() => _isPicking = false);
     }
+  }
+
+  Widget _buildFramePreview(String frame) {
+    if (frame.startsWith('http://') || frame.startsWith('https://')) {
+      return Image.network(frame, fit: BoxFit.cover);
+    }
+    return Image.asset(frame, fit: BoxFit.cover);
   }
 }
 

@@ -13,6 +13,10 @@ class AppColors {
   static const ink = Color(0xFF122018);
   static const muted = Color(0xFF6D7D72);
   static const white = Colors.white;
+  static const backgroundLight = lightBackground;
+  static const backgroundDark = darkBackground;
+  static const saffron = gold;
+  static const indiaGreen = pakistanGreen;
 
   static const primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
