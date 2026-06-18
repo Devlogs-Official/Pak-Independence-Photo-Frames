@@ -4,7 +4,7 @@ class AppConstants {
   static const String appName = '14 August Photo Frames';
   static const String appVersion = '1.0.0';
   static const String androidPackageId =
-      'pro.devlogs.pakistan.independence.wallpapers';
+      'com.pro.dev.logs.wallpaper.august.independence.day.pak.photo.editor.frames';
   static const String androidLiveWallpaperMethodChannel =
       'wallpaper.apply/channel';
   static const String apiBaseUrl =
@@ -22,6 +22,5 @@ class AppConstants {
   static const String termsAndConditionsUrl =
       'https://www.devlogs.pro/terms-and-conditions/';
 
-  static String get shareMessage =>
-      'Check out 14 August Photo Frames\n$playStoreUrl';
+  static String get shareMessage => 'Happy Independence Day\n$playStoreUrl';
 }

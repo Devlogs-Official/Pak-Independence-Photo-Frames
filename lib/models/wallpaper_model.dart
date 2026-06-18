@@ -36,7 +36,7 @@ class WallpaperModel {
         'path',
       ]),
     );
-    final thumbnail = _absoluteUrl(
+    final thumbnailUrl = _absoluteUrl(
       _stringValue(json, const [
         'thumbnail_url',
         'thumbnailUrl',
@@ -48,12 +48,14 @@ class WallpaperModel {
         'previewUrl',
       ]),
     );
+    final displayUrl = imageUrl.isEmpty ? thumbnailUrl : imageUrl;
+    final thumbnail = thumbnailUrl.isEmpty ? displayUrl : thumbnailUrl;
     final categoryId =
         _intValue(json, const ['category_id', 'categoryId', 'cat_id']) ??
         fallbackCategoryId;
     final id =
         _intValue(json, const ['id', 'wallpaper_id', 'wallpaperId']) ??
-        Object.hash(imageUrl, categoryId);
+        Object.hash(displayUrl, categoryId);
     final name = _stringValue(json, const ['name', 'title', 'filename']);
     final createdRaw = _stringValue(json, const [
       'created_at',
@@ -65,8 +67,8 @@ class WallpaperModel {
     return WallpaperModel(
       id: id,
       name: name.isEmpty ? 'Wallpaper $id' : name,
-      imageUrl: imageUrl,
-      thumbnailUrl: thumbnail.isEmpty ? imageUrl : thumbnail,
+      imageUrl: displayUrl,
+      thumbnailUrl: thumbnail,
       categoryId: categoryId,
       createdAt: DateTime.tryParse(createdRaw),
     );

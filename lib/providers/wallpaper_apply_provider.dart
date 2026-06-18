@@ -51,13 +51,13 @@ class WallpaperApplyProvider extends ChangeNotifier {
     required String id,
   }) async {
     return _runApply(() async {
-      await _channel.invokeMethod<void>('applyLiveWallpaper', {
-        'videoUrl': videoUrl,
-        'id': id,
-      });
-      return const WallpaperApplyResult(
+      final message = await _channel.invokeMethod<String>(
+        'applyLiveWallpaper',
+        {'videoUrl': videoUrl, 'id': id},
+      );
+      return WallpaperApplyResult(
         success: true,
-        message: 'Live wallpaper applied successfully.',
+        message: message ?? 'Choose Set wallpaper on the next screen.',
       );
     });
   }

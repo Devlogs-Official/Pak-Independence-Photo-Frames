@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../constants/app_constants.dart';
 import '../../models/wallpaper_model.dart';
 
 class MediaActions {
@@ -42,7 +43,7 @@ class MediaActions {
       final file = File('${tempDir.path}/$filename');
       await file.writeAsBytes(bytes, flush: true);
       await SharePlus.instance.share(
-        ShareParams(files: [XFile(file.path)], text: 'Pakistan Independence'),
+        ShareParams(files: [XFile(file.path)], text: AppConstants.shareMessage),
       );
     } finally {
       client.close(force: true);

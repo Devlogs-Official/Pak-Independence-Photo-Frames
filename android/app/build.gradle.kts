@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.pro.dev.logs.pak_independence_photo_frames"
+    namespace = "com.pro.dev.logs.wallpaper.august.independence.day.pak.photo.editor.frames"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.pro.dev.logs.pak_independence_photo_frames"
+        applicationId = "com.pro.dev.logs.wallpaper.august.independence.day.pak.photo.editor.frames"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

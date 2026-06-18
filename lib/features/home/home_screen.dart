@@ -208,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen>
                           const SizedBox(height: 14),
                           _CategoryCardWide(
                             icon: Icons.favorite_rounded,
-                            label: 'Favourites',
+                            label: 'My Creations/Favorites',
                             subtitle: 'Your saved frames and wallpapers',
                             gradient: const LinearGradient(
                               begin: Alignment.centerLeft,

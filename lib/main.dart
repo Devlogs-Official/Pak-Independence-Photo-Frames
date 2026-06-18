@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'core/constants/app_constants.dart';
 import 'core/constants/app_theme.dart';
+import 'features/dps/dp_editing_screen.dart' as dp;
 import 'features/frames/screens/frames_editing_screen.dart';
 import 'providers/favorites_provider.dart';
 import 'providers/wallpaper_apply_provider.dart';
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => IndependenceFrameProvider()),
+        ChangeNotifierProvider(create: (_) => dp.IndependenceFrameProvider()),
         ChangeNotifierProvider(
           create: (_) => FavoritesProvider()..loadFavorites(),
         ),

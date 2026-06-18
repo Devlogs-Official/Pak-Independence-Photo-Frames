@@ -19,7 +19,6 @@ class WallpaperDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return WallpaperPreviewScaffold(
       wallpaper: wallpaper,
-      title: 'Static Wallpaper',
       applyLabel: 'Apply Wallpaper',
       applyIcon: Icons.wallpaper_rounded,
     );
@@ -29,14 +28,12 @@ class WallpaperDetailScreen extends StatelessWidget {
 class WallpaperPreviewScaffold extends StatefulWidget {
   const WallpaperPreviewScaffold({
     required this.wallpaper,
-    required this.title,
     required this.applyLabel,
     required this.applyIcon,
     super.key,
   });
 
   final WallpaperModel wallpaper;
-  final String title;
   final String applyLabel;
   final IconData applyIcon;
 
@@ -102,16 +99,6 @@ class _WallpaperPreviewScaffoldState extends State<WallpaperPreviewScaffold> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // CachedNetworkImage(
-          //   imageUrl: widget.wallpaper.imageUrl,
-          //   fit: BoxFit.contain,
-          //   placeholder: (_, _) => const ColoredBox(color: Colors.black),
-          //   errorWidget: (_, _, _) => const ColoredBox(color: Colors.black),
-          // ),
-          // BackdropFilter(
-          //   filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-          //   child: ColoredBox(color: Colors.black.withValues(alpha: .42)),
-          // ),
           CachedNetworkImage(
             imageUrl: widget.wallpaper.imageUrl,
             fit: BoxFit.contain,

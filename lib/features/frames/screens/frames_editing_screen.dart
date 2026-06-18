@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
@@ -13,7 +15,10 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../core/constants/category_ids.dart';
 import '../../../data/services/wallpaper_service.dart';
+import '../../home/category_detail_screen.dart';
 
 class FramesEditingScreen extends StatefulWidget {
   final String frameImageUrl;
@@ -59,26 +64,120 @@ class _FramesEditingScreenState extends State<FramesEditingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: _EditorAppBar(onExport: _showExportDialog),
-      body: Column(
-        children: [
-          Expanded(
-            child: Container(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(6, 12, 6, 12),
-                  child: _buildFrameContent(),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        await _confirmQuitEditing();
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: _EditorAppBar(
+          onBack: _confirmQuitEditing,
+          onExport: _showExportDialog,
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: Container(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(6, 12, 6, 12),
+                    child: _buildFrameContent(),
+                  ),
                 ),
               ),
             ),
-          ),
-          _buildStaticBottomSheet(),
-        ],
+            _buildStaticBottomSheet(),
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _confirmQuitEditing() async {
+    final shouldQuit = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+            side: BorderSide(color: AppColors.gold.withValues(alpha: .45)),
+          ),
+          icon: Container(
+            height: 52,
+            width: 52,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: AppColors.primaryGradient,
+            ),
+            child: const Icon(
+              Icons.logout_rounded,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
+          title: const Text(
+            'Quit editing?',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w900),
+          ),
+          content: const Text(
+            'Are you sure you want to quit editing? Your current work will be discarded.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppColors.muted,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Yes, quit'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!mounted || shouldQuit != true) return;
+    _returnToCategoryDetail();
+  }
+
+  void _returnToCategoryDetail() {
+    final navigator = Navigator.of(context);
+    var routesToPop = 2;
+    navigator.popUntil((route) {
+      if (routesToPop == 0 || route.isFirst) return true;
+      routesToPop--;
+      return false;
+    });
+
+    if (routesToPop > 0) {
+      final categoryId = int.tryParse(widget.categoryId);
+      if (categoryId == null) return;
+      navigator.pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => CategoryDetailScreen(
+            title: _titleForCategory(categoryId),
+            categoryId: categoryId,
+          ),
+        ),
+      );
+    }
+  }
+
+  String _titleForCategory(int categoryId) {
+    if (categoryId == CategoryIds.dpFrames) return 'DP Frames';
+    return 'Photo Frames';
   }
 
   Widget _buildFrameContent() {
@@ -298,16 +397,16 @@ class _FramesEditingScreenState extends State<FramesEditingScreen> {
     );
   }
 
-  void _openFramesBottomSheet(String categoryId) async {
+  void _openFramesBottomSheet(String categoryId) {
     final framesProvider = Provider.of<IndependenceFrameProvider>(
       context,
       listen: false,
     );
 
-    if (framesProvider.getFrames(categoryId).isEmpty) {
-      await framesProvider.fetchFrames(categoryId);
+    if (framesProvider.getFrames(categoryId).isEmpty &&
+        !framesProvider.isLoading(categoryId)) {
+      unawaited(framesProvider.fetchFrames(categoryId));
     }
-    if (!mounted) return;
 
     showModalBottomSheet(
       context: context,
@@ -319,92 +418,100 @@ class _FramesEditingScreenState extends State<FramesEditingScreen> {
         ),
       ),
       builder: (BuildContext context) {
-        final frames = framesProvider.getFrames(categoryId);
+        return Consumer<IndependenceFrameProvider>(
+          builder: (context, provider, _) {
+            final frames = provider.getFrames(categoryId);
+            final isLoading = provider.isLoading(categoryId);
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              height: 50,
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                gradient: AppColors.primaryGradient,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-              ),
-              child: const Center(
-                child: Text(
-                  'Select Frame',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  height: 50,
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    gradient: AppColors.primaryGradient,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(28),
+                    ),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'Select Frame',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: frames.isEmpty
-                  ? const Center(child: CircularProgressIndicator())
-                  : GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
-                            childAspectRatio: 0.7,
-                          ),
-                      itemCount: frames.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final frame = frames[index];
+                const SizedBox(height: 20),
+                Expanded(
+                  child: isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : frames.isEmpty
+                      ? const Center(child: Text('No frames found.'))
+                      : GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                                childAspectRatio: 0.7,
+                              ),
+                          itemCount: frames.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final frame = frames[index];
 
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _selectedFramePath = frame.frameUrl;
-                            });
-                            _precacheSelectedFrame(frame.frameUrl);
-                            Navigator.pop(context);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 20,
-                            ),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: AppColors.pakistanGreen.withValues(
-                                    alpha: 0.18,
-                                  ),
-                                  width: 1.5,
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _selectedFramePath = frame.frameUrl;
+                                });
+                                _precacheSelectedFrame(frame.frameUrl);
+                                Navigator.pop(context);
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 20,
                                 ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.pakistanGreen.withValues(
-                                      alpha: 0.18,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: AppColors.pakistanGreen.withValues(
+                                        alpha: 0.18,
+                                      ),
+                                      width: 1.5,
                                     ),
-                                    blurRadius: 18,
-                                    offset: const Offset(0, 10),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.pakistanGreen
+                                            .withValues(alpha: 0.18),
+                                        blurRadius: 18,
+                                        offset: const Offset(0, 10),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: _buildFrameImage(
-                                  frame.frameUrl,
-                                  fit: BoxFit.cover,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: _buildFrameImage(
+                                      frame.frameUrl,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-            ),
-          ],
+                            );
+                          },
+                        ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -525,14 +632,7 @@ class _FramesEditingScreenState extends State<FramesEditingScreen> {
               const SnackBar(content: Text('Image saved to gallery.')),
             );
           }
-          final directory = await getExternalStorageDirectory();
-          final path = '${directory?.path}/wedding_frames';
-          await Directory(path).create(recursive: true);
-
-          final filePath =
-              '$path/wedding_frame_${DateTime.now().millisecondsSinceEpoch}.png';
-          final file = File(filePath);
-          await file.writeAsBytes(imageData);
+          await _saveCreationCopy(imageData);
         }
       }
     } catch (e) {
@@ -553,7 +653,7 @@ class _FramesEditingScreenState extends State<FramesEditingScreen> {
         await SharePlus.instance.share(
           ShareParams(
             files: [XFile(file.path)],
-            text: 'Check out this amazing frame!',
+            text: AppConstants.shareMessage,
           ),
         );
       }
@@ -586,6 +686,18 @@ class _FramesEditingScreenState extends State<FramesEditingScreen> {
 
     final storage = await Permission.storage.request();
     return storage.isGranted;
+  }
+
+  Future<void> _saveCreationCopy(Uint8List imageData) async {
+    final directory = await getExternalStorageDirectory();
+    if (directory == null) return;
+
+    final path = '${directory.path}/independence_frames';
+    await Directory(path).create(recursive: true);
+
+    final filePath =
+        '$path/independence_frame_${DateTime.now().millisecondsSinceEpoch}.png';
+    await File(filePath).writeAsBytes(imageData);
   }
 
   void _addNewText() {
@@ -924,7 +1036,7 @@ class _FramesEditingScreenState extends State<FramesEditingScreen> {
                             },
                             child: const Text(
                               'Cancel',
-                              style: TextStyle(color: Colors.black),
+                              style: TextStyle(color: Colors.white),
                             ),
                           ),
 
@@ -1154,20 +1266,18 @@ class _FramesEditingScreenState extends State<FramesEditingScreen> {
   }
 
   Widget _buildFrameImage(String path, {required BoxFit fit}) {
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-      return Image.network(path, fit: fit);
-    }
-    return Image.asset(path, fit: fit);
+    return Image(
+      image: _frameImageProvider(path),
+      fit: fit,
+      gaplessPlayback: true,
+      filterQuality: FilterQuality.medium,
+    );
   }
 
   Future<void> _precacheSelectedFrame(String path) async {
     setState(() => _isFrameLoading = true);
     try {
-      final imageProvider =
-          path.startsWith('http://') || path.startsWith('https://')
-          ? NetworkImage(path)
-          : AssetImage(path) as ImageProvider;
-      await precacheImage(imageProvider, context);
+      await precacheImage(_frameImageProvider(path), context);
 
       if (!mounted || _selectedFramePath != path) return;
       setState(() {
@@ -1180,6 +1290,13 @@ class _FramesEditingScreenState extends State<FramesEditingScreen> {
       });
     }
   }
+
+  ImageProvider _frameImageProvider(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return CachedNetworkImageProvider(path);
+    }
+    return AssetImage(path);
+  }
 }
 
 class IndependenceFrame {
@@ -1191,6 +1308,7 @@ class IndependenceFrame {
 class IndependenceFrameProvider extends ChangeNotifier {
   final WallpaperService _service;
   final Map<String, List<IndependenceFrame>> _frames = {};
+  final Set<String> _loadingCategoryIds = {};
 
   IndependenceFrameProvider({
     WallpaperService service = const WallpaperService(),
@@ -1199,12 +1317,19 @@ class IndependenceFrameProvider extends ChangeNotifier {
   List<IndependenceFrame> getFrames(String categoryId) =>
       _frames[categoryId] ?? const [];
 
+  bool isLoading(String categoryId) => _loadingCategoryIds.contains(categoryId);
+
   Future<void> fetchFrames(String categoryId) async {
+    if (isLoading(categoryId)) return;
+    _loadingCategoryIds.add(categoryId);
+    notifyListeners();
+
     final parsedCategoryId = int.tryParse(categoryId);
     if (parsedCategoryId == null) {
       _frames[categoryId] = AppAssets.frames
           .map((framePath) => IndependenceFrame(framePath))
           .toList(growable: false);
+      _loadingCategoryIds.remove(categoryId);
       notifyListeners();
       return;
     }
@@ -1221,6 +1346,7 @@ class IndependenceFrameProvider extends ChangeNotifier {
     } catch (_) {
       _frames[categoryId] = const [];
     }
+    _loadingCategoryIds.remove(categoryId);
     notifyListeners();
   }
 }
@@ -1228,9 +1354,10 @@ class IndependenceFrameProvider extends ChangeNotifier {
 enum _EditorTool { none, editPhoto, frame, text, export }
 
 class _EditorAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final VoidCallback onBack;
   final VoidCallback onExport;
 
-  const _EditorAppBar({required this.onExport});
+  const _EditorAppBar({required this.onBack, required this.onExport});
 
   @override
   Size get preferredSize => const Size.fromHeight(72);
@@ -1247,7 +1374,7 @@ class _EditorAppBar extends StatelessWidget implements PreferredSizeWidget {
             _GlassCircleButton(
               tooltip: 'Back',
               icon: Icons.arrow_back_rounded,
-              onPressed: () => Navigator.of(context).maybePop(),
+              onPressed: onBack,
             ),
             const SizedBox(width: 14),
             const Expanded(

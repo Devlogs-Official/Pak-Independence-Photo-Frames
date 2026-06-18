@@ -216,9 +216,12 @@ class _GreetingCardDetailScreenState extends State<GreetingCardDetailScreen> {
                                       strokeWidth: 2.4,
                                     ),
                                   )
-                                : const Icon(Icons.share_rounded),
+                                : const Icon(Icons.share_rounded,color: Colors.white),
                             label: Text(
                               _isSharing ? 'Sharing...' : 'Share Greeting Card',
+                              style: TextStyle(
+                                color: Colors.white
+                              ),
                             ),
                           ),
                         ),

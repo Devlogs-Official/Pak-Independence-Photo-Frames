@@ -82,16 +82,18 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen>
         value: SystemUiOverlayStyle.light,
         child: Scaffold(
           backgroundColor: AppColors.lightBackground,
+          appBar: AppBar(
+            title: Text(widget.title),
+            centerTitle: true,
+            elevation: 0,
+            backgroundColor: AppColors.deepGreen,
+          ),
           body: Consumer<WallpaperProvider>(
             builder: (context, provider, _) {
               return CustomScrollView(
                 controller: _scrollController,
                 physics: const BouncingScrollPhysics(),
                 slivers: [
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: _CategoryAppBarDelegate(title: widget.title),
-                  ),
                   if (provider.isInitialLoading)
                     const SliverFillRemaining(
                       child: LoadingWidget(message: 'Loading ...'),
@@ -108,22 +110,21 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen>
                       child: EmptyWidget(message: 'No Data Found.'),
                     )
                   else ...[
+                    // SliverPadding(
+                    //   padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                    //   sliver: SliverToBoxAdapter(
+                    //     child: FadeTransition(
+                    //       opacity: _fadeAnimation,
+                    //       child: _CategorySummary(
+                    //         count: provider.totalRecords == 0
+                    //             ? provider.items.length
+                    //             : provider.totalRecords,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                     SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-                      sliver: SliverToBoxAdapter(
-                        child: FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: _CategorySummary(
-                            count: provider.totalRecords == 0
-                                ? provider.items.length
-                                : provider.totalRecords,
-                            hint: _hintForCategory(widget.categoryId),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
                       sliver: SliverGrid.builder(
                         itemCount: provider.items.length,
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -177,12 +178,12 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen>
     );
   }
 
-  String _hintForCategory(int categoryId) {
-    if (CategoryIds.isFrameCategory(categoryId)) return 'Tap a frame to use it';
-    if (categoryId == CategoryIds.liveWallpapers) return 'Tap to preview live';
-    if (categoryId == CategoryIds.greetingCards) return 'Tap to open card';
-    return 'Tap to preview wallpaper';
-  }
+  // String _hintForCategory(int categoryId) {
+  //   if (CategoryIds.isFrameCategory(categoryId)) return 'Tap a frame to use it';
+  //   if (categoryId == CategoryIds.liveWallpapers) return 'Tap to preview live';
+  //   if (categoryId == CategoryIds.greetingCards) return 'Tap to open card';
+  //   return 'Tap to preview wallpaper';
+  // }
 
   double _gridAspectForCategory(int categoryId) {
     if (categoryId == CategoryIds.dpFrames) return _dpCanvasAspect;
@@ -241,193 +242,6 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen>
   }
 }
 
-class _CategorySummary extends StatelessWidget {
-  final int count;
-  final String hint;
-
-  const _CategorySummary({required this.count, required this.hint});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          decoration: BoxDecoration(
-            gradient: AppColors.primaryGradient,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            '$count Designs',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              fontSize: 12,
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            hint,
-            style: const TextStyle(
-              color: AppColors.muted,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _CategoryAppBarDelegate extends SliverPersistentHeaderDelegate {
-  final String title;
-
-  const _CategoryAppBarDelegate({required this.title});
-
-  @override
-  double get minExtent => kToolbarHeight + 32;
-
-  @override
-  double get maxExtent => 160;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    final progress = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
-    final topPad = MediaQuery.paddingOf(context).top;
-
-    return Container(
-      decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -10,
-            top: topPad,
-            child: Opacity(
-              opacity: 1 - progress,
-              child: SizedBox(
-                width: 90,
-                height: 90,
-                child: Stack(
-                  children: [
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.1),
-                      ),
-                      child: const SizedBox.expand(),
-                    ),
-                    Positioned(
-                      left: 22,
-                      top: -4,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.deepGreen.withValues(alpha: 0.9),
-                        ),
-                        child: const SizedBox(height: 88, width: 88),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: SizedBox(
-              height: 2,
-              child: DecoratedBox(
-                decoration: BoxDecoration(gradient: AppColors.goldGradient),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 12,
-            child: Padding(
-              padding: EdgeInsets.only(top: topPad),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back_rounded,
-                      color: Colors.white,
-                    ),
-                    onPressed: () => Navigator.of(context).maybePop(),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                            height: 1.1,
-                          ),
-                        ),
-                        if (progress < 0.7)
-                          Text(
-                            'Independence Day',
-                            style: TextStyle(
-                              color: AppColors.gold.withValues(
-                                alpha: 1 - progress,
-                              ),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(right: 16),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: AppColors.goldGradient,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      '14 Aug',
-                      style: TextStyle(
-                        color: AppColors.deepGreen,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  bool shouldRebuild(covariant _CategoryAppBarDelegate oldDelegate) =>
-      oldDelegate.title != title;
-}
-
 class _WallpaperGridCard extends StatefulWidget {
   final WallpaperModel wallpaper;
   final int index;
@@ -450,6 +264,13 @@ class _WallpaperGridCardState extends State<_WallpaperGridCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isFrameCategory = CategoryIds.isFrameCategory(
+      widget.wallpaper.categoryId,
+    );
+    final imageUrl = widget.wallpaper.thumbnailUrl.isNotEmpty
+        ? widget.wallpaper.thumbnailUrl
+        : widget.wallpaper.imageUrl;
+
     return AnimatedScale(
       scale: _pressed ? 0.95 : 1.0,
       duration: const Duration(milliseconds: 120),
@@ -481,15 +302,47 @@ class _WallpaperGridCardState extends State<_WallpaperGridCard> {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                CachedNetworkImage(
-                  imageUrl: widget.wallpaper.thumbnailUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (_, _) => Container(
-                    color: AppColors.pakistanGreen.withValues(alpha: .08),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: isFrameCategory
+                        ? LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppColors.pakistanGreen.withValues(alpha: .10),
+                              AppColors.gold.withValues(alpha: .18),
+                              Colors.white,
+                            ],
+                          )
+                        : null,
+                    color: isFrameCategory ? null : Colors.white,
                   ),
-                  errorWidget: (_, _, _) =>
-                      const Center(child: Icon(Icons.broken_image_rounded)),
                 ),
+                if (imageUrl.isNotEmpty)
+                  CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: isFrameCategory ? BoxFit.contain : BoxFit.cover,
+                    placeholder: (_, _) => Container(
+                      color: AppColors.pakistanGreen.withValues(alpha: .08),
+                    ),
+                    errorWidget: (_, _, _) =>
+                        const Center(child: Icon(Icons.broken_image_rounded)),
+                  )
+                else
+                  const Center(child: Icon(Icons.broken_image_rounded)),
+                if (isFrameCategory)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: .65),
+                            width: 6,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 Positioned(
                   left: 0,
                   right: 0,

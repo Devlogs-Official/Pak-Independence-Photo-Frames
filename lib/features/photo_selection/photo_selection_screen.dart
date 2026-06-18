@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -26,6 +27,7 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen>
     with SingleTickerProviderStateMixin {
   final ImagePicker _picker = ImagePicker();
   bool _isPicking = false;
+  bool _didPrecacheFrame = false;
   late AnimationController _starController;
 
   @override
@@ -41,6 +43,17 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen>
   void dispose() {
     _starController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didPrecacheFrame) return;
+    _didPrecacheFrame = true;
+    precacheImage(
+      _frameImageProvider(widget.selectedFrame),
+      context,
+    ).catchError((_) {});
   }
 
   @override
@@ -201,13 +214,28 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen>
   }
 
   Widget _buildFramePreview(String frame) {
-    if (frame.startsWith('http://') || frame.startsWith('https://')) {
-      return Image.network(frame, fit: BoxFit.cover);
-    }
-    return Image.asset(frame, fit: BoxFit.cover);
+    return Image(
+      image: _frameImageProvider(frame),
+      fit: _isDpFrame ? BoxFit.contain : BoxFit.cover,
+      gaplessPlayback: true,
+      filterQuality: FilterQuality.medium,
+      frameBuilder: (context, child, frameNumber, wasSynchronouslyLoaded) {
+        if (wasSynchronouslyLoaded || frameNumber != null) return child;
+        return const Center(child: CircularProgressIndicator(strokeWidth: 2.4));
+      },
+      errorBuilder: (_, _, _) =>
+          const Center(child: Icon(Icons.broken_image_rounded)),
+    );
   }
 
   bool get _isDpFrame => widget.categoryId == CategoryIds.dpFrames;
+
+  ImageProvider _frameImageProvider(String frame) {
+    if (frame.startsWith('http://') || frame.startsWith('https://')) {
+      return CachedNetworkImageProvider(frame);
+    }
+    return AssetImage(frame);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
