@@ -1,4 +1,4 @@
-package com.pro.dev.logs.wallpaper.august.independence.day.pak.photo.editor.frames
+package com.pro.devlogs.pakistan.independence.photo.frames
 
 import android.content.Context
 import android.media.MediaPlayer

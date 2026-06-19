@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:pak_independence_photo_frames/core/constants/app_assets.dart';
 
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_constants.dart';
@@ -10,7 +10,8 @@ class AppDrawer extends StatelessWidget {
   final VoidCallback onPrivacy;
   final VoidCallback onTerms;
 
-  const AppDrawer({super.key,
+  const AppDrawer({
+    super.key,
     required this.onFavorites,
     required this.onShare,
     required this.onPrivacy,
@@ -127,62 +128,25 @@ class _DrawerHeaderCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 58,
-                    height: 58,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: .14),
-                          blurRadius: 18,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.flag_rounded,
-                      color: AppColors.pakistanGreen,
-                      size: 28,
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 7,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: .14),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: .18),
+              Center(
+                child: Container(
+                  width: 76,
+                  height: 76,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: .14),
+                        blurRadius: 18,
+                        offset: const Offset(0, 8),
                       ),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.star_rounded,
-                          color: AppColors.gold,
-                          size: 15,
-                        ),
-                        SizedBox(width: 5),
-                        Text(
-                          'Azadi',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ],
-                    ),
+                    ],
                   ),
-                ],
+                  clipBehavior: Clip.antiAlias,
+                  child: Image.asset(AppAssets.appLogo),
+                ),
               ),
               const SizedBox(height: 20),
               const Text(

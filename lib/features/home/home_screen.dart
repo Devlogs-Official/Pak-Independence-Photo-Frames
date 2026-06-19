@@ -105,8 +105,6 @@ class _HomeScreenState extends State<HomeScreen>
                                 child: _CategoryCard(
                                   icon: AppAssets.photoFrameRounded,
                                   label: 'Frames',
-                                  subtitle:
-                                      '${AppAssets.frames.length} designs',
                                   gradient: AppColors.primaryGradient,
                                   accentColor: AppColors.pakistanGreen,
                                   onTap: () => _openCategory(
@@ -121,7 +119,6 @@ class _HomeScreenState extends State<HomeScreen>
                                 child: _CategoryCard(
                                   icon: AppAssets.dps,
                                   label: 'DPs',
-                                  subtitle: 'Profile pics',
                                   gradient: const LinearGradient(
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
@@ -147,7 +144,6 @@ class _HomeScreenState extends State<HomeScreen>
                                 child: _CategoryCard(
                                   icon: AppAssets.wallpapers,
                                   label: 'Live Wallpaper',
-                                  subtitle: 'Animated walls',
                                   gradient: const LinearGradient(
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
@@ -169,7 +165,6 @@ class _HomeScreenState extends State<HomeScreen>
                                 child: _CategoryCard(
                                   icon: AppAssets.wallpapers,
                                   label: 'Static',
-                                  subtitle: 'Phone walls',
                                   gradient: const LinearGradient(
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
@@ -503,7 +498,6 @@ class _HeroMenuButton extends StatelessWidget {
 class _CategoryCard extends StatefulWidget {
   final String icon;
   final String label;
-  final String subtitle;
   final LinearGradient gradient;
   final Color accentColor;
   final Color iconColor;
@@ -512,7 +506,6 @@ class _CategoryCard extends StatefulWidget {
   const _CategoryCard({
     required this.icon,
     required this.label,
-    required this.subtitle,
     required this.gradient,
     required this.accentColor,
     this.iconColor = Colors.white,
@@ -592,18 +585,6 @@ class _CategoryCardState extends State<_CategoryCard> {
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
                   color: AppColors.ink,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 3),
-              Text(
-                widget.subtitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.muted,
                 ),
                 textAlign: TextAlign.center,
               ),

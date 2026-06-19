@@ -4,7 +4,7 @@ class AppConstants {
   static const String appName = '14 August Photo Frames';
   static const String appVersion = '1.0.0';
   static const String androidPackageId =
-      'com.pro.dev.logs.wallpaper.august.independence.day.pak.photo.editor.frames';
+      'com.pro.devlogs.pakistan.independence.photo.frames';
   static const String androidLiveWallpaperMethodChannel =
       'wallpaper.apply/channel';
   static const String apiBaseUrl =

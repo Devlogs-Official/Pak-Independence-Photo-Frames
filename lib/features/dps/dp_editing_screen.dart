@@ -1337,9 +1337,9 @@ class IndependenceFrameProvider extends ChangeNotifier {
 
     final parsedCategoryId = int.tryParse(categoryId);
     if (parsedCategoryId == null) {
-      _frames[categoryId] = AppAssets.frames
-          .map((framePath) => IndependenceFrame(framePath))
-          .toList(growable: false);
+      // _frames[categoryId] = AppAssets.frames
+      //     .map((framePath) => IndependenceFrame(framePath))
+      //     .toList(growable: false);
       _loadingCategoryIds.remove(categoryId);
       notifyListeners();
       return;

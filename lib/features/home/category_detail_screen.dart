@@ -142,7 +142,6 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen>
                             child: _WallpaperGridCard(
                               wallpaper: wallpaper,
                               index: index,
-                              label: _labelForCategory(widget.categoryId),
                               onTap: () => _openWallpaper(context, wallpaper),
                             ),
                           );
@@ -191,14 +190,6 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen>
     return 0.66;
   }
 
-  String _labelForCategory(int categoryId) {
-    if (categoryId == CategoryIds.staticWallpapers) return 'Wallpaper';
-    if (categoryId == CategoryIds.liveWallpapers) return 'Live';
-    if (categoryId == CategoryIds.greetingCards) return 'Card';
-    if (categoryId == CategoryIds.dpFrames) return 'DP';
-    return 'Frame';
-  }
-
   void _openWallpaper(BuildContext context, WallpaperModel wallpaper) {
     Widget screen;
     switch (wallpaper.categoryId) {
@@ -245,13 +236,11 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen>
 class _WallpaperGridCard extends StatefulWidget {
   final WallpaperModel wallpaper;
   final int index;
-  final String label;
   final VoidCallback onTap;
 
   const _WallpaperGridCard({
     required this.wallpaper,
     required this.index,
-    required this.label,
     required this.onTap,
   });
 
@@ -373,50 +362,6 @@ class _WallpaperGridCardState extends State<_WallpaperGridCard> {
                             favorites.toggleFavorite(widget.wallpaper),
                       );
                     },
-                  ),
-                ),
-                Positioned(
-                  bottom: 8,
-                  left: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: AppColors.goldGradient,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '${widget.label} ${widget.index + 1}',
-                      style: const TextStyle(
-                        color: AppColors.deepGreen,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 8,
-                  right: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.pakistanGreen,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text(
-                      'Open',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
                   ),
                 ),
               ],
